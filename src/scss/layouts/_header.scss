@@ -1,0 +1,14 @@
+@use '../base/variables' as v;
+@use '../components/mixins' as m;
+
+.header {
+    background-color: v.$verde;
+    &__titulo {
+        color: v.$blanco;
+        text-transform: uppercase;
+        text-align: center;
+        font-size: 1.6rem;
+        margin: 1rem 0;
+        border: none;
+    }
+}
