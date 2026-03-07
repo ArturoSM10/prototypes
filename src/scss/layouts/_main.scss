@@ -117,10 +117,16 @@
     }
     
     tbody {
+        span {
+            font-weight: 400;
+            text-transform: capitalize;
+        }
+
         td {
             text-align: center;
             margin: 0 auto;
             padding-bottom: 1rem;
+            font-weight: 800;
         }
 
         & tr:first-child td {

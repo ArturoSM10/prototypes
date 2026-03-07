@@ -57,42 +57,37 @@ UI.prototype.agregarAlerta = function(texto, tipo) {
     }, 3000);
 };
 
-UI.prototype.mostrarSpinner = () => {
-    const spinner = document.querySelector('.spinner');
-    spinner.style.display = 'block';
-    setTimeout(()=>{
-        spinner.style.display = 'none';
-    }, 3000);
-}
-
-UI.prototype.agregarInfoTabla = (total, seguro) => {
-    const table = document.querySelector('.table');
+UI.prototype.crearTabla = function(texto, dato) {
     const tableBody = document.querySelector('.tbody');
 
-    const filMarca = document.createElement('tr')
-    const colMarca = document.createElement('td')
-    colMarca.textContent = seguro.marca;
-    filMarca.appendChild(colMarca);
-    tableBody.appendChild(filMarca);
+    const fila = document.createElement('tr');
+    const span = document.createElement('span');
+    const col = document.createElement('td');
 
-    const filYear = document.createElement('tr')
-    const colYear = document.createElement('td')
-    colYear.textContent = seguro.year;
-    filYear.appendChild(colYear);
-    tableBody.appendChild(filYear);
+    span.textContent = dato;
+    col.textContent = texto;
+    col.appendChild(span);
+    fila.appendChild(col);
+    tableBody.appendChild(fila);
+}
 
-    const filTipo = document.createElement('tr')
-    const colTipo = document.createElement('td')
-    colTipo.textContent = seguro.tipo;
-    filTipo.appendChild(colTipo);
-    tableBody.appendChild(filTipo);
+UI.prototype.agregarInfoTabla = function(total, seguro) {
+    const infoTabla = {
+        Marca: seguro.marca,
+        Año: seguro.year,
+        Tipo: seguro.tipo,
+        Total: `$${total}`
+    };
 
-    const filTotal = document.createElement('tr')
-    const colTotal = document.createElement('td')
-    colTotal.textContent = total;
-    filTotal.appendChild(colTotal);
-    tableBody.appendChild(filTotal);
+    for (const key in infoTabla) {
+        this.crearTabla(`${key}: `, infoTabla[key]);
+    }
+}
 
+UI.prototype.limpiarTabla = (element) => {
+    while(element.firstChild) {
+        element.firstChild.remove();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () =>{
@@ -102,21 +97,46 @@ document.addEventListener('DOMContentLoaded', () =>{
 
 function leerEventos() {
     const form = document.querySelector('.form');
-    const marca = document.querySelector('#marca');
-    const year = document.querySelector('#year');
-    form.addEventListener('submit', e => {
-        const tipo = document.querySelector('input[name="tipo"]:checked');
-        e.preventDefault();
-        if (marca.value === '' || year.value === '' || tipo.value === '') {
-            ui.agregarAlerta('Todos los campos son obligatorios.', 'incorrecto');
-            return;
-        }
-        ui.agregarAlerta('Cotizando...', 'correcto');
-        ui.mostrarSpinner();
-        const seguro = new Seguro(marca.value, year.value, tipo.value);
-        const precioTotal = seguro.calcularPrecio();
-        
+    form.addEventListener('submit', manejarSubmit);
+}
+
+function manejarSubmit(e) {
+    const marca = document.querySelector('#marca').value;
+    const year = document.querySelector('#year').value;
+    const tipo = document.querySelector('input[name="tipo"]:checked').value;
+    e.preventDefault();
+    if (marca=== '' || year=== '' || tipo === '') {
+        ui.agregarAlerta('Todos los campos son obligatorios.', 'incorrecto');
+        return;
+    }
+
+    limpiarResultado();
+
+    const seguro = new Seguro(marca, year, tipo);
+    const precioTotal = seguro.calcularPrecio();
+
+    mostrarResumen (precioTotal, seguro);
+}
+
+function limpiarResultado() {
+    const table = document.querySelector('.table');
+    const tBody = document.querySelector('.tbody');
+    if (table.style.display === 'table') {
+        table.style.display = 'none';
+    }
+    ui.limpiarTabla(tBody);
+}
+
+function mostrarResumen (precioTotal, seguro) {
+    ui.agregarAlerta('Cotizando...', 'correcto');
+
+    const spinner = document.querySelector('.spinner');
+    spinner.style.display = 'block';
+    
+    setTimeout(()=>{
+        spinner.style.display = 'none';
+
         const table = document.querySelector('.table').style.display = 'table';
         ui.agregarInfoTabla(precioTotal, seguro);
-    });
+    }, 3000);
 }
